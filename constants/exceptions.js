@@ -1,6 +1,5 @@
 const badRequestCode = 400
 const unauthorizedCode = 401
-const forbiddenCode = 403
 const notFoundCode = 404
 
 const USER_EXIST = {
@@ -33,11 +32,23 @@ const EMAIL_OR_PASSWORD_INVALID = {
     message: 'Email or Password invalid'
 }
 
+const ACCESS_DENIED = {
+    code: unauthorizedCode,
+    message: 'Access Denied, Use Authorization token in header request!'
+}
+
+const INVALID_TOKEN = {
+    code: unauthorizedCode,
+    message: 'Invalid Token !'
+}
+
 module.exports = {
     USER_EXIST,
     EMAIL_EXIST,
     ACCOUNT_NUMBER_EXIST,
     IDENTITY_NUMBER_EXIST,
+    ACCESS_DENIED,
+    INVALID_TOKEN,
     USER_NOT_FOUND,
     EMAIL_OR_PASSWORD_INVALID
 }
