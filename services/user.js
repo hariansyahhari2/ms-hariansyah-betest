@@ -160,8 +160,8 @@ exports.authenticate = async (req, res) => {
 
     const validPwd = await bcrypt.compare(req.body.password, user.password);
     if(!validPwd) {
-        return res.status(errorMessages.EMAIL_INVALID.code).send(
-            ResponseMessage.error(res.statusCode, errorMessages.EMAIL_INVALID.message)
+        return res.status(errorMessages.PASSWORD_INVALID.code).send(
+            ResponseMessage.error(res.statusCode, errorMessages.PASSWORD_INVALID.message)
         );
     }
 
