@@ -9,7 +9,7 @@ exports.findAllUser = async (filter) => {
 }
 
 exports.findUser = async (filter) => {
-    return User.findOne(filter);
+    return User.findOne(filter)
 }
 
 exports.save = async (user) => {

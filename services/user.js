@@ -21,19 +21,34 @@ exports.register = async (req, res) => {
         );
     }
 
-    let isExist = await repository.findUser({ emailAddress: req.body.emailAddress});
+    let isExist = await repository.findUser({
+        $and: [
+            { emailAddress: req.body.emailAddress },
+            { deleted: null }
+        ]
+    });
     if(isExist) {
         return res.status(errorMessages.EMAIL_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.EMAIL_EXIST.message)
         );
     }
-    isExist = await repository.findUser({accountNumber: req.body.accountNumber});
+    isExist = await repository.findUser({
+        $and: [
+            { accountNumber: req.body.accountNumber },
+            { deleted: null }
+        ]
+    });
     if(isExist) {
         return res.status(errorMessages.ACCOUNT_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.ACCOUNT_NUMBER_EXIST.message)
         );
     }
-    isExist = await repository.findUser({identityNumber: req.body.identityNumber});
+    isExist = await repository.findUser({
+        $and: [
+            { identityNumber: req.body.identityNumber },
+            { deleted: null }
+        ]
+    });
     if(isExist) {
         return res.status(errorMessages.IDENTITY_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.IDENTITY_NUMBER_EXIST.message)
@@ -121,7 +136,12 @@ exports.delete = async (req, res) => {
         );
     }
 
-    let user = await repository.findUser({email: req.body.emailAddress, deleted: null});
+    let user = await repository.findUser({
+        $and: [
+            { email: req.body.emailAddress },
+            { deleted: null }
+        ]
+    });
     if(!user) {
         return res.status(errorMessages.EMAIL_INVALID.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.EMAIL_INVALID.message)
@@ -135,7 +155,6 @@ exports.delete = async (req, res) => {
         );
     }
 
-    user.deleted = Date.now();
     const savedUser = await repository.findByIdAndUpdate(user._id, user);
     res.send(ResponseMessage.ok(
         Properties.hideSensitiveData(savedUser)
@@ -151,7 +170,13 @@ exports.authenticate = async (req, res) => {
         );
     }
 
-    let user = await User.findOne({email: req.body.emailAddress, deleted: null});
+    console.log(req.body.emailAddress)
+    var user = await repository.findUser({
+        $and: [
+            { emailAddress: req.body.emailAddress },
+            { deleted: null }
+        ]
+    });
     if(!user) {
         return res.status(errorMessages.EMAIL_INVALID.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.EMAIL_INVALID.message)
@@ -171,7 +196,12 @@ exports.authenticate = async (req, res) => {
 
 exports.getByAccountNumber = async (req, res) => {
     Validations.validateNumber(res, req.params.accountNumber);
-    const user = await repository.findUser({ accountNumber: req.params.accountNumber, deleted: null });
+    const user = await repository.findUser({
+        $and: [
+            { accountNumber: req.params.accountNumber },
+            { deleted: null }
+        ]
+    });
     if (!user) {
         return res.status(errorMessages.USER_NOT_FOUND.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
@@ -184,7 +214,12 @@ exports.getByAccountNumber = async (req, res) => {
 
 exports.getByIdentityNumber = async (req, res) => {
     Validations.validateNumber(res, req.params.identityNumber);
-    const user = await repository.findUser({ identityNumber: req.params.identityNumber, deleted: null });
+    const user = await repository.findUser({
+        $and: [
+            { identityNumber: req.params.identityNumber },
+            { deleted: null }
+        ]
+    });
     if (!user) {
         return res.status(errorMessages.USER_NOT_FOUND.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
