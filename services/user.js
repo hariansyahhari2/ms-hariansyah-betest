@@ -4,10 +4,11 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs');
 const Properties = require('../tools/Properties');
 const errorMessages = require('../constants/exceptions')
+const repository = require('../repository/user')
 const Validations = require('../tools/Validations');
 
 exports.getAll = async (req, res) => {
-    let users = await User.find({ deleted: null })
+    const users = await repository.findAllUser({ deleted: null })
     res.send(ResponseMessage.ok(Properties.hideSensitiveDataList(users)))
 }
 
@@ -20,22 +21,22 @@ exports.register = async (req, res) => {
         )
     }
 
-    let isExist = await User.findOne({ emailAddress: req.body.emailAddress})
+    let isExist = await repository.findUser({ emailAddress: req.body.emailAddress})
     if(isExist) {
         return res.status(errorMessages.EMAIL_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.EMAIL_EXIST.message)
         )
     }
-    isExist = await User.findOne({accountNumber: req.body.accountNumber})
+    isExist = await repository.findUser({accountNumber: req.body.accountNumber})
     if(isExist) {
-        return res.status(400).send(
-            ResponseMessage.error(res.statusCode, 'Account Number Already Used !')
+        return res.status(errorMessages.ACCOUNT_NUMBER_EXIST.code).send(
+            ResponseMessage.error(res.statusCode, errorMessages.ACCOUNT_NUMBER_EXIST.message)
         )
     }
-    isExist = await User.findOne({identityNumber: req.body.identityNumber})
+    isExist = await repository.findUser({identityNumber: req.body.identityNumber})
     if(isExist) {
-        return res.status(400).send(
-            ResponseMessage.error(res.statusCode, 'Identity Number Already Used !')
+        return res.status(errorMessages.IDENTITY_NUMBER_EXIST.code).send(
+            ResponseMessage.error(res.statusCode, errorMessages.IDENTITY_NUMBER_EXIST.message)
         )
     }
 
@@ -51,7 +52,7 @@ exports.register = async (req, res) => {
     })
 
     try {
-        const saveUser = await user.save()
+        const saveUser = await repository.save(user)
         res.send(ResponseMessage.ok(
             Properties.hideSensitiveData(saveUser)
         ))
@@ -66,7 +67,7 @@ exports.update = async (req, res)  => {
     try {
         const token = req.header('Authorization')
         const payload = jwt.decode(token)
-        const user = await User.findById(payload._id)
+        const user = await repository.findById(payload._id)
 
         const validPwd = await bcrypt.compare(req.body.password, user.password)
         if(!validPwd) {
@@ -75,19 +76,19 @@ exports.update = async (req, res)  => {
             )
         }
 
-        let isExist = await User.findOne({ emailAddress: req.body.emailAddress})
+        let isExist = await repository.findUser({ emailAddress: req.body.emailAddress})
         if(isExist && isExist._id.toString() !== payload._id) {
             return res.status(errorMessages.EMAIL_EXIST.code).send(
                 ResponseMessage.error(res.statusCode, errorMessages.EMAIL_EXIST.message)
             )
         }
-        isExist = await User.findOne({accountNumber: req.body.accountNumber})
+        isExist = await repository.findUser({accountNumber: req.body.accountNumber})
         if(isExist && isExist._id.toString() !== payload._id) {
             return res.status(errorMessages.ACCOUNT_NUMBER_EXIST.code).send(
                 ResponseMessage.error(res.statusCode, errorMessages.ACCOUNT_NUMBER_EXIST.message)
             )
         }
-        isExist = await User.findOne({identityNumber: req.body.identityNumber})
+        isExist = await repository.findUser({identityNumber: req.body.identityNumber})
         if(isExist && isExist._id.toString() !== payload._id) {
             return res.status(errorMessages.IDENTITY_NUMBER_EXIST.code).send(
                 ResponseMessage.error(res.statusCode, errorMessages.IDENTITY_NUMBER_EXIST.message)
@@ -98,7 +99,7 @@ exports.update = async (req, res)  => {
         user.emailAddress = req.body.emailAddress
         user.identityNumber = req.body.identityNumber
         user.accountNumber = req.body.accountNumber
-        const savedUser = await User.findByIdAndUpdate(user._id, user)
+        const savedUser = await repository.findByIdAndUpdate(user._id, user)
         res.send(savedUser)
 
     } catch (err) {
@@ -118,7 +119,7 @@ exports.delete = async (req, res) => {
         )
     }
 
-    let user = await User.findOne({email: req.body.emailAddress, deleted: null})
+    let user = await repository.findUser({email: req.body.emailAddress, deleted: null})
     if(!user) {
         return res.status(errorMessages.EMAIL_OR_PASSWORD_INVALID.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.EMAIL_OR_PASSWORD_INVALID.message)
@@ -133,7 +134,7 @@ exports.delete = async (req, res) => {
     }
 
     user.deleted = Date.now()
-    const savedUser = await User.findByIdAndUpdate(user._id, user)
+    const savedUser = await repository.findByIdAndUpdate(user._id, user)
     res.send(savedUser)
 
 }
@@ -167,7 +168,7 @@ exports.authenticate = async (req, res) => {
 
 exports.getByAccountNumber = async (req, res) => {
     Validations.validateNumber(res, req.params.accountNumber)
-    const user = await User.findOne({ accountNumber: req.params.accountNumber, deleted: null })
+    const user = await repository.findUser({ accountNumber: req.params.accountNumber, deleted: null })
     if (!user) {
         return res.status(errorMessages.USER_NOT_FOUND.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
@@ -180,7 +181,7 @@ exports.getByAccountNumber = async (req, res) => {
 
 exports.getByIdentityNumber = async (req, res) => {
     Validations.validateNumber(res, req.params.identityNumber)
-    const user = await User.findOne({ identityNumber: req.params.identityNumber, deleted: null })
+    const user = await repository.findUser({ identityNumber: req.params.identityNumber, deleted: null })
     if (!user) {
         return res.status(errorMessages.USER_NOT_FOUND.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
@@ -196,7 +197,7 @@ exports.getMyInfo = async (req, res) => {
     try {
         const token = req.header('Authorization')
         const payload = jwt.decode(token)
-        const user = await User.findById(payload._id)
+        const user = await repository.findById(payload._id)
         res.send(ResponseMessage.ok(Properties.hideSensitiveData(user)))
     } catch (err) {
         res.status(errorMessages.USER_NOT_FOUND.code).send(
