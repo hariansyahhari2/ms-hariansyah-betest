@@ -79,51 +79,50 @@ exports.register = async (req, res) => {
 }
 
 exports.update = async (req, res)  => {
-    try {
-        const token = req.header('Authorization');
-        const payload = jwt.decode(token);
-        const user = await repository.findById(payload._id);
+    const token = req.header('Authorization');
+    const payload = jwt.decode(token);
+    const user = await repository.findById(payload._id);
 
-        const validPwd = await bcrypt.compare(req.body.password, user.password);
-        if(!validPwd) {
-            return res.status(errorMessages.PASSWORD_INVALID.code).send(
-                ResponseMessage.error(res.statusCode, errorMessages.PASSWORD_INVALID.message)
-            );
-        }
+    if (!user) {
+        return res.status(errorMessages.ACCESS_DENIED.code).send(
+            ResponseMessage.error(res.statusCode, errorMessages.ACCESS_DENIED.message)
+        )
+    }
 
-        let isExist = await repository.findUser({ emailAddress: req.body.emailAddress});
-        if(isExist && isExist._id.toString() !== payload._id) {
-            return res.status(errorMessages.EMAIL_EXIST.code).send(
-                ResponseMessage.error(res.statusCode, errorMessages.EMAIL_EXIST.message)
-            );
-        }
-        isExist = await repository.findUser({accountNumber: req.body.accountNumber});
-        if(isExist && isExist._id.toString() !== payload._id) {
-            return res.status(errorMessages.ACCOUNT_NUMBER_EXIST.code).send(
-                ResponseMessage.error(res.statusCode, errorMessages.ACCOUNT_NUMBER_EXIST.message)
-            );
-        }
-        isExist = await repository.findUser({identityNumber: req.body.identityNumber});
-        if(isExist && isExist._id.toString() !== payload._id) {
-            return res.status(errorMessages.IDENTITY_NUMBER_EXIST.code).send(
-                ResponseMessage.error(res.statusCode, errorMessages.IDENTITY_NUMBER_EXIST.message)
-            );
-        }
-
-        user.userName = req.body.userName;
-        user.emailAddress = req.body.emailAddress;
-        user.identityNumber = req.body.identityNumber;
-        user.accountNumber = req.body.accountNumber;
-        const savedUser = await repository.findByIdAndUpdate(user._id, user);
-        res.send(ResponseMessage.ok(
-            Properties.hideSensitiveData(savedUser)
-        ));
-
-    } catch (err) {
-        res.status(errorMessages.USER_NOT_FOUND.code).send(
-            ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
+    const validPwd = await bcrypt.compare(req.body.password, user.password);
+    if(!validPwd) {
+        return res.status(errorMessages.PASSWORD_INVALID.code).send(
+            ResponseMessage.error(res.statusCode, errorMessages.PASSWORD_INVALID.message)
         );
     }
+
+    let isExist = await repository.findUser({ emailAddress: req.body.emailAddress});
+    if(isExist && isExist._id.toString() !== payload._id) {
+        return res.status(errorMessages.EMAIL_EXIST.code).send(
+            ResponseMessage.error(res.statusCode, errorMessages.EMAIL_EXIST.message)
+        );
+    }
+    isExist = await repository.findUser({accountNumber: req.body.accountNumber});
+    if(isExist && isExist._id.toString() !== payload._id) {
+        return res.status(errorMessages.ACCOUNT_NUMBER_EXIST.code).send(
+            ResponseMessage.error(res.statusCode, errorMessages.ACCOUNT_NUMBER_EXIST.message)
+        );
+    }
+    isExist = await repository.findUser({identityNumber: req.body.identityNumber});
+    if(isExist && isExist._id.toString() !== payload._id) {
+        return res.status(errorMessages.IDENTITY_NUMBER_EXIST.code).send(
+            ResponseMessage.error(res.statusCode, errorMessages.IDENTITY_NUMBER_EXIST.message)
+        );
+    }
+
+    user.userName = req.body.userName;
+    user.emailAddress = req.body.emailAddress;
+    user.identityNumber = req.body.identityNumber;
+    user.accountNumber = req.body.accountNumber;
+    const savedUser = await repository.findByIdAndUpdate(user._id, user);
+    res.send(ResponseMessage.ok(
+        Properties.hideSensitiveData(savedUser)
+    ));
 }
 
 

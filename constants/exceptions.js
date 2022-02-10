@@ -49,7 +49,7 @@ const PASSWORD_INVALID = {
 
 const ACCESS_DENIED = {
     code: unauthorizedCode,
-    message: 'Access Denied, Use Authorization token in header request!'
+    message: 'Access Denied!'
 }
 
 const INVALID_TOKEN = {
