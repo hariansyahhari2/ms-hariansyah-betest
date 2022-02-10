@@ -6,7 +6,7 @@ require('dotenv/config')
 
 const app = express();
 
-init(app)
+init(app);
 mongo.init();
 
 module.exports = app;

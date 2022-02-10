@@ -10,16 +10,18 @@ exports.registerValidation = (data) => {
             .required(),
         accountNumber: Joi.number()
             .integer()
-            .min(0),
+            .min(0)
+            .required(),
         identityNumber: Joi.number()
             .integer()
-            .min(0),
+            .min(0)
+            .required(),
         password: Joi.string()
             .min(6)
             .required()
-    })
+    });
 
-    return schema.validate(data)
+    return schema.validate(data);
 }
 
 exports.updateValidation = (data) => {
@@ -38,9 +40,9 @@ exports.updateValidation = (data) => {
         password: Joi.string()
             .min(6)
             .required()
-    })
+    });
 
-    return schema.validate(data)
+    return schema.validate(data);
 }
 
 exports.authenticateValidation = (data) => {
@@ -51,13 +53,13 @@ exports.authenticateValidation = (data) => {
         password: Joi.string()
             .min(6)
             .required()
-    })
+    });
 
-    return schema.validate(data)
+    return schema.validate(data);
 }
 
 exports.validateNumber = (res, data) => {
-    const isNumber = data.match(/^[0-9]+$/)
+    const isNumber = data.match(/^[0-9]+$/);
     if (!isNumber) {
         return res.status(400).send(ResponseMessage.error(res.statusCode, 'Bad Request'))
     }

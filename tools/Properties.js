@@ -5,11 +5,11 @@ exports.hideSensitiveData = (data) => {
         emailAddress: data.emailAddress,
         accountNumber: data.accountNumber,
         identityNumber: data.identityNumber
-    }
+    };
 }
 
 exports.hideSensitiveDataList = (dataList) => {
-    const output = []
+    const output = [];
     dataList.forEach((data) => {
         output.push({
             _id: data._id,
@@ -18,6 +18,6 @@ exports.hideSensitiveDataList = (dataList) => {
             accountNumber: data.accountNumber,
             identityNumber: data.identityNumber
         })
-    })
+    });
     return output;
 }

@@ -27,9 +27,14 @@ const USER_NOT_FOUND = {
     message: 'User Not Found'
 }
 
-const EMAIL_OR_PASSWORD_INVALID = {
+const EMAIL_INVALID = {
     code: unauthorizedCode,
-    message: 'Email or Password invalid'
+    message: 'Email Not Found in Database'
+}
+
+const PASSWORD_INVALID = {
+    code: unauthorizedCode,
+    message: 'Password invalid'
 }
 
 const ACCESS_DENIED = {
@@ -50,5 +55,6 @@ module.exports = {
     ACCESS_DENIED,
     INVALID_TOKEN,
     USER_NOT_FOUND,
-    EMAIL_OR_PASSWORD_INVALID
+    EMAIL_INVALID,
+    PASSWORD_INVALID
 }

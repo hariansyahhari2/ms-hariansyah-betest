@@ -4,12 +4,14 @@ const errorMessage = require('../constants/exceptions')
 
 const verifyToken = (req, res, next) => {
     const token = req.header('Authorization')
-    if(!token) return res.status(errorMessage.ACCESS_DENIED.code).send(
-        ResponseMessage.error(res.status, errorMessage.ACCESS_DENIED.message)
-    )
+    if(!token) {
+        return res.status(errorMessage.ACCESS_DENIED.code).send(
+            ResponseMessage.error(res.status, errorMessage.ACCESS_DENIED.message)
+        );
+    }
     try {
-        req.user = jwt.verify(token, process.env.SECRET_KEY)
-        next()
+        req.user = jwt.verify(token, process.env.SECRET_KEY);
+        next();
 
     }catch(err){
         res.status(errorMessage.INVALID_TOKEN.code).send(
@@ -18,4 +20,4 @@ const verifyToken = (req, res, next) => {
     }
 }
 
-module.exports = verifyToken
+module.exports = verifyToken;
