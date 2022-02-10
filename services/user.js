@@ -128,7 +128,7 @@ exports.update = async (req, res)  => {
 
 exports.delete = async (req, res) => {
 
-    const { error } = Validations.authenticateValidation(req.body);
+    const { error } = Validations.deleteUser(req.body);
     if (error) {
         return res.status(400).send(
             ResponseMessage.error(res.statusCode, error.details[0].message)
