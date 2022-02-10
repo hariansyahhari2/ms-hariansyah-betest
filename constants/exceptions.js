@@ -2,6 +2,16 @@ const badRequestCode = 400
 const unauthorizedCode = 401
 const notFoundCode = 404
 
+const BAD_REQUEST = {
+    code: badRequestCode,
+    message: 'Bad Request'
+}
+
+const PATH_NOT_FOUND = {
+    code: notFoundCode,
+    message: 'Path Not Found'
+}
+
 const USER_EXIST = {
     code: badRequestCode,
     message: 'User already exists'
@@ -48,6 +58,8 @@ const INVALID_TOKEN = {
 }
 
 module.exports = {
+    BAD_REQUEST,
+    PATH_NOT_FOUND,
     USER_EXIST,
     EMAIL_EXIST,
     ACCOUNT_NUMBER_EXIST,

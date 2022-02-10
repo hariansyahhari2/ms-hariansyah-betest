@@ -58,9 +58,10 @@ exports.authenticateValidation = (data) => {
     return schema.validate(data);
 }
 
-exports.validateNumber = (res, data) => {
-    const isNumber = data.match(/^[0-9]+$/);
-    if (!isNumber) {
-        return res.status(400).send(ResponseMessage.error(res.statusCode, 'Bad Request'))
+exports.validateNumber = (data) => {
+    try {
+        return data.match(/^[0-9]+$/);
+    } catch (err) {
+        return false;
     }
 }

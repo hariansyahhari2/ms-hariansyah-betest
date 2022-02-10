@@ -195,7 +195,9 @@ exports.authenticate = async (req, res) => {
 }
 
 exports.getByAccountNumber = async (req, res) => {
-    Validations.validateNumber(res, req.params.accountNumber);
+    if (!Validations.validateNumber(req.params.accountNumber)) {
+        return res.status(errorMessages.BAD_REQUEST.code).send(ResponseMessage.error(res.statusCode, errorMessages.BAD_REQUEST.message))
+    }
     const user = await repository.findUser({
         $and: [
             { accountNumber: req.params.accountNumber },
@@ -213,7 +215,9 @@ exports.getByAccountNumber = async (req, res) => {
 }
 
 exports.getByIdentityNumber = async (req, res) => {
-    Validations.validateNumber(res, req.params.identityNumber);
+    if (!Validations.validateNumber(req.params.identityNumber)) {
+        return res.status(errorMessages.BAD_REQUEST.code).send(ResponseMessage.error(res.statusCode, errorMessages.BAD_REQUEST.message))
+    }
     const user = await repository.findUser({
         $and: [
             { identityNumber: req.params.identityNumber },
