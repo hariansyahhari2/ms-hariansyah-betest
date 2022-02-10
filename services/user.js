@@ -169,7 +169,6 @@ exports.authenticate = async (req, res) => {
         );
     }
 
-    console.log(req.body.emailAddress)
     var user = await repository.findUser({
         $and: [
             { emailAddress: req.body.emailAddress },
