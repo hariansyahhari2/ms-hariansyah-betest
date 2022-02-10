@@ -154,6 +154,7 @@ exports.delete = async (req, res) => {
         );
     }
 
+    user.deleted = Date.now();
     const savedUser = await repository.findByIdAndUpdate(user._id, user);
     res.send(ResponseMessage.ok(
         Properties.hideSensitiveData(savedUser)
