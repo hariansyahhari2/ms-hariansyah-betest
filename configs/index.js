@@ -4,10 +4,13 @@ const indexRouter = require('../routes')
 const userRouter = require('../routes/user')
 const ResponseMessage = require('../responses/ResponseMessage')
 const errorMessages = require('../constants/exceptions')
+const responseTime = require('response-time')
+const Redis = require('../configs/redis')
 
 const init = (app) => {
     app.use(bodyParser())
     app.use(cors());
+    app.use(responseTime())
     initRoutes(app);
 }
 

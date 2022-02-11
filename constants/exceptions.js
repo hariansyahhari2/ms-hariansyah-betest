@@ -19,17 +19,17 @@ const USER_EXIST = {
 
 const EMAIL_EXIST = {
     code: badRequestCode,
-    message: 'Email already exists'
+    message: 'Email already exists or Account with this Email has deleted'
 }
 
 const ACCOUNT_NUMBER_EXIST = {
     code: badRequestCode,
-    message: 'Account number already exists'
+    message: 'Account number already exists or User with this Account Number has deleted'
 }
 
 const IDENTITY_NUMBER_EXIST = {
     code: badRequestCode,
-    message: 'Identity Number already exists'
+    message: 'Identity Number already exists or User with this Identity Number has deleted'
 }
 
 const USER_NOT_FOUND = {
@@ -39,7 +39,7 @@ const USER_NOT_FOUND = {
 
 const EMAIL_INVALID = {
     code: unauthorizedCode,
-    message: 'Email Not Found in Database'
+    message: 'Email Not Found in Database or User with this Email has deleted'
 }
 
 const PASSWORD_INVALID = {

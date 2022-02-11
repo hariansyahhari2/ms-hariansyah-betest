@@ -6,10 +6,27 @@ const Properties = require('../tools/Properties');
 const errorMessages = require('../constants/exceptions')
 const repository = require('../repository/user')
 const Validations = require('../tools/Validations');
+const Redis = require('../configs/redis')
 
 exports.getAll = async (req, res) => {
-    const users = await repository.findAllUser({ deleted: null });
-    res.send(ResponseMessage.ok(Properties.hideSensitiveDataList(users)));
+    const redisKey = 'list';
+
+    Redis.get(redisKey, async function (err, value) {
+        if (value) {
+            console.log('from redis')
+            const users = JSON.parse(value);
+            return res.send(ResponseMessage.ok(Properties.hideSensitiveDataList(users)));
+        } else {
+            console.log('from db')
+            const users = await repository.findAllUser({ deleted: null });
+            await Redis.set(redisKey, JSON.stringify(users), function (err, value) {
+                if (err) {
+                    console.log(err)
+                }
+            })
+            return res.send(ResponseMessage.ok(Properties.hideSensitiveData(users)));
+        }
+    });
 }
 
 exports.register = async (req, res) => {
@@ -21,35 +38,20 @@ exports.register = async (req, res) => {
         );
     }
 
-    let isExist = await repository.findUser({
-        $and: [
-            { emailAddress: req.body.emailAddress },
-            { deleted: null }
-        ]
-    });
-    if(isExist) {
+    let isExist = await repository.findUser({ emailAddress: req.body.emailAddress });
+    if(isExist || isExist.deleted != null) {
         return res.status(errorMessages.EMAIL_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.EMAIL_EXIST.message)
         );
     }
-    isExist = await repository.findUser({
-        $and: [
-            { accountNumber: req.body.accountNumber },
-            { deleted: null }
-        ]
-    });
-    if(isExist) {
+    isExist = await repository.findUser({ accountNumber: req.body.accountNumber });
+    if(isExist || isExist.deleted != null) {
         return res.status(errorMessages.ACCOUNT_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.ACCOUNT_NUMBER_EXIST.message)
         );
     }
-    isExist = await repository.findUser({
-        $and: [
-            { identityNumber: req.body.identityNumber },
-            { deleted: null }
-        ]
-    });
-    if(isExist) {
+    isExist = await repository.findUser({ identityNumber: req.body.identityNumber });
+    if(isExist || isExist.deleted != null) {
         return res.status(errorMessages.IDENTITY_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.IDENTITY_NUMBER_EXIST.message)
         );
@@ -68,6 +70,14 @@ exports.register = async (req, res) => {
 
     try {
         const saveUser = await repository.save(user);
+        Redis.del('list', function (err, success) {
+            console.log(success)
+        })
+        await Redis.set(saveUser._id.toString(), JSON.stringify(saveUser), function (err, value) {
+            if (err) {
+                console.log(err)
+            }
+        })
         res.send(ResponseMessage.ok(
             Properties.hideSensitiveData(saveUser)
         ));
@@ -97,19 +107,19 @@ exports.update = async (req, res)  => {
     }
 
     let isExist = await repository.findUser({ emailAddress: req.body.emailAddress});
-    if(isExist && isExist._id.toString() !== payload._id) {
+    if((isExist && isExist._id.toString() !== payload._id) || isExist.deleted != null) {
         return res.status(errorMessages.EMAIL_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.EMAIL_EXIST.message)
         );
     }
     isExist = await repository.findUser({accountNumber: req.body.accountNumber});
-    if(isExist && isExist._id.toString() !== payload._id) {
+    if((isExist && isExist._id.toString() !== payload._id) || isExist.deleted != null) {
         return res.status(errorMessages.ACCOUNT_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.ACCOUNT_NUMBER_EXIST.message)
         );
     }
     isExist = await repository.findUser({identityNumber: req.body.identityNumber});
-    if(isExist && isExist._id.toString() !== payload._id) {
+    if((isExist && isExist._id.toString() !== payload._id) || isExist.deleted != null) {
         return res.status(errorMessages.IDENTITY_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.IDENTITY_NUMBER_EXIST.message)
         );
@@ -120,6 +130,8 @@ exports.update = async (req, res)  => {
     user.identityNumber = req.body.identityNumber;
     user.accountNumber = req.body.accountNumber;
     const savedUser = await repository.findByIdAndUpdate(user._id, user);
+
+    flushRedis(user)
     res.send(ResponseMessage.ok(
         Properties.hideSensitiveData(savedUser)
     ));
@@ -156,6 +168,8 @@ exports.delete = async (req, res) => {
 
     user.deleted = Date.now();
     const savedUser = await repository.findByIdAndUpdate(user._id, user);
+
+    flushRedis(user)
     res.send(ResponseMessage.ok(
         Properties.hideSensitiveData(savedUser)
     ));
@@ -197,40 +211,71 @@ exports.getByAccountNumber = async (req, res) => {
     if (!Validations.validateNumber(req.params.accountNumber)) {
         return res.status(errorMessages.BAD_REQUEST.code).send(ResponseMessage.error(res.statusCode, errorMessages.BAD_REQUEST.message))
     }
-    const user = await repository.findUser({
-        $and: [
-            { accountNumber: req.params.accountNumber },
-            { deleted: null }
-        ]
+
+    Redis.get(`account-${req.params.accountNumber}`, async function (err, value) {
+        if (value) {
+            console.log('from redis')
+            const user = JSON.parse(value)
+            return res.send(ResponseMessage.ok(Properties.hideSensitiveData(user)));
+        } else {
+            console.log('from db')
+
+            const user = await repository.findUser({
+                $and: [
+                    { accountNumber: req.params.accountNumber },
+                    { deleted: null }
+                ]
+            });
+            if (!user) {
+                return res.status(errorMessages.USER_NOT_FOUND.code).send(
+                    ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
+                );
+            }
+
+            await Redis.set(`account-${req.params.accountNumber}`, JSON.stringify(user), function (err, value) {
+                if (err) {
+                    console.log(err)
+                }
+            })
+            return res.send(ResponseMessage.ok(Properties.hideSensitiveData(user)));
+        }
     });
-    if (!user) {
-        return res.status(errorMessages.USER_NOT_FOUND.code).send(
-            ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
-        );
-    }
-    res.send(ResponseMessage.ok(
-        Properties.hideSensitiveData(user)
-    ));
 }
 
 exports.getByIdentityNumber = async (req, res) => {
     if (!Validations.validateNumber(req.params.identityNumber)) {
         return res.status(errorMessages.BAD_REQUEST.code).send(ResponseMessage.error(res.statusCode, errorMessages.BAD_REQUEST.message))
     }
-    const user = await repository.findUser({
-        $and: [
-            { identityNumber: req.params.identityNumber },
-            { deleted: null }
-        ]
+
+
+    Redis.get(`identity-${req.params.identityNumber}`, async function (err, value) {
+        if (value) {
+            console.log('from redis')
+            const user = JSON.parse(value)
+            return res.send(ResponseMessage.ok(Properties.hideSensitiveData(user)));
+        } else {
+            console.log('from db')
+
+            const user = await repository.findUser({
+                $and: [
+                    { identityNumber: req.params.identityNumber },
+                    { deleted: null }
+                ]
+            });
+            if (!user) {
+                return res.status(errorMessages.USER_NOT_FOUND.code).send(
+                    ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
+                );
+            }
+
+            await Redis.set(`identity-${req.params.identityNumber}`, JSON.stringify(user), function (err, value) {
+                if (err) {
+                    console.log(err)
+                }
+            })
+            return res.send(ResponseMessage.ok(Properties.hideSensitiveData(user)));
+        }
     });
-    if (!user) {
-        return res.status(errorMessages.USER_NOT_FOUND.code).send(
-            ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
-        );
-    }
-    res.send(ResponseMessage.ok(
-        Properties.hideSensitiveData(user)
-    ));
 }
 
 exports.getMyInfo = async (req, res) => {
@@ -238,11 +283,50 @@ exports.getMyInfo = async (req, res) => {
     try {
         const token = req.header('Authorization');
         const payload = jwt.decode(token);
-        const user = await repository.findById(payload._id);
-        res.send(ResponseMessage.ok(Properties.hideSensitiveData(user)));
+
+        Redis.get(payload._id, async function (err, value) {
+            if (value) {
+                console.log('from redis')
+                const user = JSON.parse(value);
+                return res.send(ResponseMessage.ok(Properties.hideSensitiveData(user)));
+            } else {
+                console.log('from db')
+                const user = await repository.findById(payload._id);
+                await Redis.set(payload._id, JSON.stringify(user), function (err, value) {
+                    if (err) {
+                        console.log(err)
+                    }
+                })
+                return res.send(ResponseMessage.ok(Properties.hideSensitiveData(user)));
+            }
+        });
     } catch (err) {
+        console.log(err)
         res.status(errorMessages.USER_NOT_FOUND.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
         );
     }
+}
+
+const flushRedis = (user) => {
+    Redis.del('list', function (err, success) {
+        if (!err) {
+            console.log('success flush redish list')
+        }
+    })
+    Redis.del(user._id.toString(), function (err, success) {
+        if (!err) {
+            console.log('success flush redis id')
+        }
+    })
+    Redis.del(`account-${user.accountNumber}`, function (err, success) {
+        if (!err) {
+            console.log('success flush redis account number')
+        }
+    })
+    Redis.del(`identity-${user.identityNumber}`, function (err, success) {
+        if (!err) {
+            console.log('success flush redis identity number')
+        }
+    })
 }
