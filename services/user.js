@@ -39,19 +39,19 @@ exports.register = async (req, res) => {
     }
 
     let isExist = await repository.findUser({ emailAddress: req.body.emailAddress });
-    if(isExist || isExist.deleted != null) {
+    if(isExist) {
         return res.status(errorMessages.EMAIL_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.EMAIL_EXIST.message)
         );
     }
     isExist = await repository.findUser({ accountNumber: req.body.accountNumber });
-    if(isExist || isExist.deleted != null) {
+    if(isExist) {
         return res.status(errorMessages.ACCOUNT_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.ACCOUNT_NUMBER_EXIST.message)
         );
     }
     isExist = await repository.findUser({ identityNumber: req.body.identityNumber });
-    if(isExist || isExist.deleted != null) {
+    if(isExist) {
         return res.status(errorMessages.IDENTITY_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.IDENTITY_NUMBER_EXIST.message)
         );
@@ -107,19 +107,19 @@ exports.update = async (req, res)  => {
     }
 
     let isExist = await repository.findUser({ emailAddress: req.body.emailAddress});
-    if((isExist && isExist._id.toString() !== payload._id) || isExist.deleted != null) {
+    if(isExist && isExist._id.toString() !== payload._id) {
         return res.status(errorMessages.EMAIL_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.EMAIL_EXIST.message)
         );
     }
     isExist = await repository.findUser({accountNumber: req.body.accountNumber});
-    if((isExist && isExist._id.toString() !== payload._id) || isExist.deleted != null) {
+    if(isExist && isExist._id.toString() !== payload._id) {
         return res.status(errorMessages.ACCOUNT_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.ACCOUNT_NUMBER_EXIST.message)
         );
     }
     isExist = await repository.findUser({identityNumber: req.body.identityNumber});
-    if((isExist && isExist._id.toString() !== payload._id) || isExist.deleted != null) {
+    if(isExist && isExist._id.toString() !== payload._id) {
         return res.status(errorMessages.IDENTITY_NUMBER_EXIST.code).send(
             ResponseMessage.error(res.statusCode, errorMessages.IDENTITY_NUMBER_EXIST.message)
         );
