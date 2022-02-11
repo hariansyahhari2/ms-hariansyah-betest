@@ -14,7 +14,6 @@ const init = (app) => {
     app.use(responseTime())
     initRoutes(app);
     setInterval(function() {
-        console.log('test')
         http.get("https://ms-hariansyah-betest.herokuapp.com/");
     }, 300000);
 }
