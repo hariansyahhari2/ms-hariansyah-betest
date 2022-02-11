@@ -6,7 +6,7 @@ const ResponseMessage = require('../responses/ResponseMessage')
 const errorMessages = require('../constants/exceptions')
 const responseTime = require('response-time')
 const Redis = require('../configs/redis')
-const http = require("http");
+const https = require("https");
 
 const init = (app) => {
     app.use(bodyParser())
@@ -14,7 +14,7 @@ const init = (app) => {
     app.use(responseTime())
     initRoutes(app);
     setInterval(function() {
-        http.get("https://ms-hariansyah-betest.herokuapp.com/");
+        https.get("https://ms-hariansyah-betest.herokuapp.com/");
     }, 300000);
 }
 
