@@ -14,7 +14,7 @@ const init = (app) => {
     app.use(responseTime())
     initRoutes(app);
     setInterval(function() {
-        https.get("https://ms-hariansyah-betest.herokuapp.com/");
+        https.get("https://ms-hariansyah-betest.herokuapp.com/ping");
     }, 300000);
 }
 
