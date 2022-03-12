@@ -292,6 +292,11 @@ exports.getMyInfo = async (req, res) => {
             } else {
                 console.log('from db')
                 const user = await repository.findById(payload._id);
+                if (user === null) {
+                    return res.status(errorMessages.USER_NOT_FOUND.code).send(
+                        ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
+                    );
+                }
                 await Redis.set(payload._id, JSON.stringify(user), function (err, value) {
                     if (err) {
                         console.log(err)
