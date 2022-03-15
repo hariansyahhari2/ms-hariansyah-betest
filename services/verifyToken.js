@@ -6,7 +6,7 @@ const verifyToken = (req, res, next) => {
     const token = req.header('Authorization')
     if(!token) {
         return res.status(errorMessage.ACCESS_DENIED.code).send(
-            ResponseMessage.error(res.status, errorMessage.ACCESS_DENIED.message)
+            ResponseMessage.error(res.statusCode, errorMessage.ACCESS_DENIED.message)
         );
     }
     try {
