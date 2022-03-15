@@ -24,7 +24,7 @@ exports.getAll = async (req, res) => {
                     console.log(err)
                 }
             })
-            return res.send(ResponseMessage.ok(Properties.hideSensitiveData(users)));
+            return res.send(ResponseMessage.ok(Properties.hideSensitiveDataList(users)));
         }
     });
 }
