@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-const ResponseMessage = require('../responses/ResponseMessage');
+const responseMessage = require('../responses/responseMessage');
 const { exceptions: errorMessages, sensitiveData } = require('../constants');
 const userRepository = require('../repositories/userRepository');
 
@@ -15,11 +15,11 @@ const getMyInfo = async (req, res) => {
 
   if (user === null) {
     return res.status(errorMessages.USER_NOT_FOUND.code).send(
-      ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
+      responseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
     );
   }
 
-  return res.send(ResponseMessage.ok(user));
+  return res.send(responseMessage.ok(user));
 };
 
 const getByAccountNumber = async (req, res) => {
@@ -32,11 +32,11 @@ const getByAccountNumber = async (req, res) => {
 
   if (user === null) {
     return res.status(errorMessages.USER_NOT_FOUND.code).send(
-      ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
+      responseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
     );
   }
 
-  return res.send(ResponseMessage.ok(user));
+  return res.send(responseMessage.ok(user));
 };
 
 const getByIdentityNumber = async (req, res) => {
@@ -49,11 +49,11 @@ const getByIdentityNumber = async (req, res) => {
 
   if (user === null) {
     return res.status(errorMessages.USER_NOT_FOUND.code).send(
-      ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
+      responseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
     );
   }
 
-  return res.send(ResponseMessage.ok(user));
+  return res.send(responseMessage.ok(user));
 };
 
 const getAll = async (req, res) => {
@@ -62,7 +62,7 @@ const getAll = async (req, res) => {
     sensitiveData
   );
 
-  return res.send(ResponseMessage.ok(users));
+  return res.send(responseMessage.ok(users));
 }
 
 const register = async (req, res) => {
@@ -73,7 +73,7 @@ const register = async (req, res) => {
   let isExist = await userRepository.exists({ userName });
   if(isExist) {
     return res.status(errorMessages.USER_EXISTS.code).send(
-      ResponseMessage.error(res.statusCode, errorMessages.USER_EXISTS.message)
+      responseMessage.error(res.statusCode, errorMessages.USER_EXISTS.message)
     );
   }
 
@@ -90,10 +90,10 @@ const register = async (req, res) => {
 
     delete saveUser.password;
 
-    return res.send(ResponseMessage.ok(saveUser));
+    return res.send(responseMessage.ok(saveUser));
   } catch (e) {
     return res.status(errorMessages.BAD_REQUEST.code).send(
-      ResponseMessage.error(res.statusCode, e.message)
+      responseMessage.error(res.statusCode, e.message)
     );
   }
 }
@@ -109,14 +109,14 @@ const update = async (req, res)  => {
 
   if (!user) {
     return res.status(errorMessages.ACCESS_DENIED.code).send(
-      ResponseMessage.error(res.statusCode, errorMessages.ACCESS_DENIED.message)
+      responseMessage.error(res.statusCode, errorMessages.ACCESS_DENIED.message)
     )
   }
 
   const validPwd = await bcrypt.compare(req.body.password, user.password);
   if(!validPwd) {
     return res.status(errorMessages.PASSWORD_INVALID.code).send(
-      ResponseMessage.error(res.statusCode, errorMessages.PASSWORD_INVALID.message)
+      responseMessage.error(res.statusCode, errorMessages.PASSWORD_INVALID.message)
     );
   }
 
@@ -132,10 +132,10 @@ const update = async (req, res)  => {
       }
     );
 
-    res.send(ResponseMessage.ok(savedUser));
+    res.send(responseMessage.ok(savedUser));
   } catch (e) {
     return res.status(errorMessages.BAD_REQUEST.code).send(
-      ResponseMessage.error(res.statusCode, e.message)
+      responseMessage.error(res.statusCode, e.message)
     );
   }
 }
@@ -146,13 +146,13 @@ const deleteUser = async (req, res) => {
 
   if (userNameTokenPayload !== userName) {
     return res.status(errorMessages.ACCESS_DENIED.code).send(
-      ResponseMessage.error(res.statusCode, errorMessages.ACCESS_DENIED.message)
+      responseMessage.error(res.statusCode, errorMessages.ACCESS_DENIED.message)
     )
   }
 
   await userRepository.remove({ userName });
 
-  return res.send(ResponseMessage.ok({ success: true }));
+  return res.send(responseMessage.ok({ success: true }));
 }
 
 const authenticate = async (req, res) => {
@@ -161,19 +161,19 @@ const authenticate = async (req, res) => {
   const user = await userRepository.findOne({ userName });
   if(!user) {
     return res.status(errorMessages.USER_NOT_FOUND.code).send(
-      ResponseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
+      responseMessage.error(res.statusCode, errorMessages.USER_NOT_FOUND.message)
     );
   }
 
   const validPwd = await bcrypt.compare(password, user.password);
   if(!validPwd) {
     return res.status(errorMessages.PASSWORD_INVALID.code).send(
-      ResponseMessage.error(res.statusCode, errorMessages.PASSWORD_INVALID.message)
+      responseMessage.error(res.statusCode, errorMessages.PASSWORD_INVALID.message)
     );
   }
 
   const token = jwt.sign({ _id: user._id, userName: user.userName }, process.env.SECRET_KEY);
-  res.send(ResponseMessage.ok({ token }));
+  res.send(responseMessage.ok({ token }));
 };
 
 module.exports = {

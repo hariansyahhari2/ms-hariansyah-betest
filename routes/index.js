@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { documentationUrl } = require('../env.configs');
-const ResponseMessage = require('../responses/ResponseMessage');
+const responseMessage = require('../responses/responseMessage');
 
 const homePageService = (req, res) => {
   res.status(301).redirect(documentationUrl);
@@ -14,7 +14,7 @@ router.get(
 )
 
 router.get('/ping', async (req, res) => {
-  res.send(ResponseMessage.ok('pong'))
+  res.send(responseMessage.ok('pong'))
 });
 
 module.exports = router;

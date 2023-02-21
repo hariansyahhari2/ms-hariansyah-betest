@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const {
   secretKey
 } = require('../env.configs');
-const ResponseMessage = require('../responses/responseMessage');
+const responseMessage = require('../responses/responseMessage');
 const errorMessage = require('../constants/exceptions');
 
 const authMiddleware = (req, res, next) => {
@@ -12,14 +12,14 @@ const authMiddleware = (req, res, next) => {
 
   if (splitToken[0] !== 'Bearer') {
     return res.status(errorMessage.INVALID_TOKEN.code).send(
-      ResponseMessage.error(res.statusCode, errorMessage.INVALID_TOKEN.message)
+      responseMessage.error(res.statusCode, errorMessage.INVALID_TOKEN.message)
     )
   }
   const token = splitToken[1];
 
   if(!token) {
     return res.status(errorMessage.ACCESS_DENIED.code).send(
-      ResponseMessage.error(res.statusCode, errorMessage.ACCESS_DENIED.message)
+      responseMessage.error(res.statusCode, errorMessage.ACCESS_DENIED.message)
     );
   }
   try {
@@ -28,7 +28,7 @@ const authMiddleware = (req, res, next) => {
     next();
   }catch(err){
     res.status(errorMessage.INVALID_TOKEN.code).send(
-      ResponseMessage.error(res.statusCode, errorMessage.INVALID_TOKEN.message)
+      responseMessage.error(res.statusCode, errorMessage.INVALID_TOKEN.message)
     )
   }
 }

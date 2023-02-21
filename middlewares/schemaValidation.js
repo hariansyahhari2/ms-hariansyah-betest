@@ -1,4 +1,4 @@
-const ResponseMessage = require("../responses/responseMessage");
+const responseMessage = require("../responses/responseMessage");
 const schemaValidation = (validation) => {
   return async (req, res, next) => {
     const {
@@ -51,7 +51,7 @@ const schemaValidation = (validation) => {
     }
 
     return res.status(404).send(
-      ResponseMessage.badRequest(errors)
+      responseMessage.badRequest(errors)
     );
   };
 }
