@@ -1,6 +1,10 @@
 {
   "name": "ms-hariansyah-betest",
   "version": "0.0.0",
+  "engines": {
+    "node": "14.19.2",
+    "npm": "6.14.17"
+  },
   "private": true,
   "scripts": {
     "start": "node index.js",
