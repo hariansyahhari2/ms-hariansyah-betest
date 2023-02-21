@@ -17,12 +17,12 @@ const initApp = (app) => {
   app.use(responseTime())
   initRoutes(app);
 
-  setInterval(() => { // hit the server simultaneously to prevent server going idle
-    homeConnector({
-      method: 'GET',
-      uri: '/ping'
-    })
-  }, healthcheckDelay);
+  // setInterval(() => { // hit the server simultaneously to prevent server going idle
+  //   homeConnector({
+  //     method: 'GET',
+  //     uri: '/ping'
+  //   })
+  // }, healthcheckDelay);
 }
 
 const initRoutes = (app) => {
