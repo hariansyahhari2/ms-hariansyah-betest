@@ -6,6 +6,12 @@ const {
   redisPassword
 } = require('../env.configs');
 
-const client = redis.createClient();
+const client = redis.createClient({
+  password: redisPassword,
+  socket: {
+    host: redisHost,
+    port: +redisPort
+  }
+});
 
 module.exports = client
