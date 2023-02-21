@@ -9,7 +9,7 @@ const userRouter = require('../routes/user');
 const responseMessage = require('../responses/responseMessage');
 const errorMessages = require('../constants/exceptions');
 
-require('../configs/redis');
+// require('../configs/redis');
 
 const initApp = (app) => {
   app.use(bodyParser())
