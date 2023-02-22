@@ -7,7 +7,10 @@ const {
 } = require('../env.configs');
 
 const client = redis.createClient({
-  url: redisHost
+  user: 'default',
+  password: redisPassword,
+  host: redisHost,
+  port: +redisPort
 });
 
 module.exports = client
